@@ -1,6 +1,7 @@
 import { app } from "/scripts/app.js";
 
 const NODE_NAME = "SFT_CinematicLookComposer";
+const VISION_NODE_NAME = "SFT_CinematicVisionAnalyzer";
 const STORAGE_KEY = "comfy:cinematic-look-library:presets:v1";
 const KEYS = ["camera", "lens", "optical", "grade", "texture"];
 const LABELS = {
@@ -53,13 +54,54 @@ function selected(node, catalog) {
   }
   return result;
 }
-function loadSelection(node, catalog, selection) {
+function readVisionRecipe(node) {
+  try {
+    const raw = readWidget(node, "vision_preset")?.value;
+    if (!raw || typeof raw !== "string") return null;
+    const data = JSON.parse(raw);
+    return data && typeof data === "object" && data.descriptions
+      && typeof data.descriptions === "object" ? data : null;
+  } catch { return null; }
+}
+function cleanDescriptions(descriptions) {
+  const result = {};
+  for (const key of KEYS) {
+    const text = descriptions?.[key];
+    result[key] = typeof text === "string" ? text.trim().slice(0, 550) : "";
+  }
+  return result;
+}
+function loadSelection(node, catalog, selection, descriptions = null) {
   for (const key of KEYS) {
     const item = findItem(catalog, key, selection[key]);
     writeWidget(node, key, item?.name || "None");
   }
   writeWidget(node, "preset", "Custom Mix");
   writeWidget(node, "enabled", true);
+  const rich = descriptions && Object.values(cleanDescriptions(descriptions)).some(Boolean);
+  const recipe = rich ? {schema_version:1, source:"vision",
+    selection: Object.fromEntries(KEYS.map(k => [k, selection[k] || ""])),
+    descriptions:cleanDescriptions(descriptions)} : null;
+  writeWidget(node, "vision_preset", recipe ? JSON.stringify(recipe) : "");
+}
+function changeComponent(node, catalog, key, value) {
+  const item = findItem(catalog, key, value);
+  writeWidget(node, key, item?.name || "None");
+  writeWidget(node, "preset", "Custom Mix");
+  const recipe = readVisionRecipe(node);
+  if (recipe) {
+    recipe.selection = recipe.selection && typeof recipe.selection === "object"
+      ? recipe.selection : {};
+    recipe.selection[key] = item?.id || "";
+    recipe.descriptions = cleanDescriptions(recipe.descriptions);
+    recipe.descriptions[key] = "";
+    writeWidget(node, "vision_preset", JSON.stringify(recipe));
+  }
+}
+function snapshot(node, catalog) {
+  const recipe = readVisionRecipe(node);
+  return {selection:selected(node, catalog),
+    ...(recipe ? {descriptions:cleanDescriptions(recipe.descriptions), source:"vision"} : {})};
 }
 function el(tag, klass, text) {
   const element = document.createElement(tag);
@@ -159,8 +201,7 @@ async function showLibrary(node) {
     for (const item of catalog.categories[category]) {
       if (!(item.name + " " + item.render).toLowerCase().includes(search.toLowerCase())) continue;
       const button = makeButton("", () => {
-        writeWidget(node, category, item.name);
-        writeWidget(node, "preset", "Custom Mix");
+        changeComponent(node, catalog, category, item.name);
         render();
       });
       button.className = "sft-cine-card";
@@ -187,7 +228,7 @@ async function showLibrary(node) {
       return;
     }
     const id = "user-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-    presets.push({ id, name, selection: selected(node, catalog) });
+    presets.push({ id, name, ...snapshot(node, catalog) });
     storePresets(presets);
     active = id;
     render();
@@ -195,7 +236,8 @@ async function showLibrary(node) {
   function currentPreset() { return presets.find((x) => x.id === active); }
   function update() {
     const entry = currentPreset(); if (!entry) return;
-    entry.selection = selected(node, catalog);
+    Object.assign(entry, snapshot(node, catalog));
+    if (!readVisionRecipe(node)) { delete entry.descriptions; delete entry.source; }
     storePresets(presets); render();
   }
   function rename() {
@@ -231,7 +273,10 @@ async function showLibrary(node) {
         for (const key of KEYS) {
           selection[key] = findItem(catalog, key, entry.selection[key])?.id || "";
         }
-        presets.push({ id: "import-" + Date.now() + "-" + presets.length, name, selection });
+        const descriptions = cleanDescriptions(entry.descriptions);
+        presets.push({ id: "import-" + Date.now() + "-" + presets.length,
+          name, selection, ...(Object.values(descriptions).some(Boolean)
+            ? {descriptions, source:"vision"} : {}) });
         added++;
       }
       storePresets(presets);
@@ -246,7 +291,7 @@ async function showLibrary(node) {
     const list = el("div", "sft-cine-preset-list");
     for (const item of items) {
       const button = makeButton(item.name, () => {
-        loadSelection(node, catalog, item.selection);
+        loadSelection(node, catalog, item.selection, system ? null : item.descriptions);
         active = system ? "" : item.id;
         render();
       });
@@ -269,8 +314,7 @@ async function showLibrary(node) {
       }
       select.value = readWidget(node, key)?.value || "None";
       select.addEventListener("change", () => {
-        writeWidget(node, key, select.value);
-        writeWidget(node, "preset", "Custom Mix");
+        changeComponent(node, catalog, key, select.value);
         render();
       });
       label.append(select); sidebar.append(label);
@@ -316,6 +360,44 @@ async function showLibrary(node) {
 app.registerExtension({
   name: "sft.cinematicLookLibrary",
   nodeCreated(node) {
+    if (node.comfyClass === VISION_NODE_NAME) {
+      if (node.__cinematicVisionAdded) return;
+      node.__cinematicVisionAdded = true;
+      const original = node.onExecuted;
+      node.onExecuted = function(message) {
+        original?.apply(this, arguments);
+        const raw = message?.cinematic_preset?.[0];
+        if (typeof raw === "string") this.__latestCinematicVision = raw;
+      };
+      node.addWidget("button", "Save Vision Preset", null, async () => {
+        try {
+          const raw = node.__latestCinematicVision;
+          if (!raw) { window.alert("Run the Vision Analyzer first."); return; }
+          const catalog = await getCatalog();
+          const result = JSON.parse(raw);
+          const selection = {};
+          for (const key of KEYS) {
+            selection[key] = findItem(catalog, key, result.selection?.[key])?.id || "";
+          }
+          const descriptions = cleanDescriptions(result.descriptions);
+          if (!Object.values(descriptions).some(Boolean)) throw new Error("No usable style properties.");
+          const name = window.prompt("Preset name", result.name || "Vision Look")?.trim();
+          if (!name) return;
+          const presets = getPresets();
+          if (presets.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+            window.alert("Preset name already used."); return;
+          }
+          presets.push({id:"vision-" + Date.now() + "-"
+            + Math.random().toString(36).slice(2,7),
+            name, selection, descriptions, source:"vision"});
+          storePresets(presets);
+          window.alert("Vision preset saved. Open Cinematic Look Mixer to load it.");
+        } catch (error) {
+          window.alert("Cannot save vision preset: " + (error.message || error));
+        }
+      }, {serialize:false});
+      return;
+    }
     if (node.comfyClass !== NODE_NAME || node.__cinematicLibraryAdded) return;
     node.__cinematicLibraryAdded = true;
     node.addWidget("button", "Open Cinematic Library", null, () => {
