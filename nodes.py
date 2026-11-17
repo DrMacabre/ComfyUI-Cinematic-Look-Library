@@ -52,11 +52,43 @@ def get_system_preset(name: str) -> dict[str, Any] | None:
     )
 
 
-def look_text(selection: dict[str, str]) -> str:
+def parse_vision_preset(value: str) -> dict[str, Any] | None:
+    """Read a rich vision look; never require it to match the fixed 46 entries."""
+    if not str(value or "").strip():
+        return None
+    try:
+        raw = json.loads(value)
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise ValueError("vision_preset must contain analyzer JSON.") from exc
+    if not isinstance(raw, dict) or not isinstance(raw.get("descriptions"), dict):
+        raise ValueError("vision_preset must include a descriptions object.")
+    selection = raw.get("selection") if isinstance(raw.get("selection"), dict) else {}
+    result = {"selection": {}, "descriptions": {}}
+    for category in CATEGORIES:
+        candidate = selection.get(category, "")
+        entry = get_entry(category, candidate) if isinstance(candidate, str) else None
+        result["selection"][category] = entry["id"] if entry else ""
+        description = raw["descriptions"].get(category, "")
+        result["descriptions"][category] = (
+            " ".join(description.split())[:550] if isinstance(description, str) else ""
+        )
+    if not any(result["descriptions"].values()) and not any(result["selection"].values()):
+        raise ValueError("vision_preset contains no usable look properties.")
+    return result
+
+
+def look_text(selection: dict[str, str],
+              descriptions: dict[str, str] | None = None) -> str:
     lines = []
     for category in CATEGORIES:
         entry = get_entry(category, selection.get(category, NONE))
-        if entry is not None:
+        custom = (descriptions or {}).get(category, "").strip()
+        if custom:
+            nearest = f' (nearest catalog analogy: {entry["name"]})' if entry else ""
+            lines.append(
+                f'{CATEGORY_LABELS[category]} rendering{nearest}: {custom.rstrip(".")}.'
+            )
+        elif entry is not None:
             lines.append(
                 f'{CATEGORY_LABELS[category]}: {entry["name"]} — {entry["render"]}.'
             )
@@ -68,10 +100,11 @@ def compose_cinematic_prompt(
     selection: dict[str, str],
     enabled: bool = True,
     replace_sft_look: bool = True,
+    custom_descriptions: dict[str, str] | None = None,
 ) -> tuple[str, str]:
     """Return (complete prompt, look-only block). Non-selected mode is a no-op."""
     base_prompt = str(base_prompt or "")
-    rendered = look_text(selection)
+    rendered = look_text(selection, custom_descriptions)
     if not enabled or not rendered:
         return (base_prompt, "")
 
@@ -130,6 +163,9 @@ class CinematicLookComposer:
                 "enabled": ("BOOLEAN", {"default": True}),
                 "replace_sft_look": ("BOOLEAN", {"default": True}),
             },
+            "optional": {
+                "vision_preset": ("STRING", {"default": "", "multiline": True}),
+            },
         }
 
     def compose(
@@ -143,6 +179,7 @@ class CinematicLookComposer:
         texture: str = NONE,
         enabled: bool = True,
         replace_sft_look: bool = True,
+        vision_preset: str = "",
     ):
         selection = {
             "camera": camera,
@@ -152,11 +189,18 @@ class CinematicLookComposer:
             "texture": texture,
         }
         system_preset = get_system_preset(preset)
+        descriptions = None
         if system_preset:
             selection = system_preset["selection"]
+        elif enabled and str(vision_preset or "").strip():
+            recipe = parse_vision_preset(vision_preset)
+            if recipe:
+                selection.update(recipe["selection"])
+                descriptions = recipe["descriptions"]
         return compose_cinematic_prompt(
             base_prompt,
             selection,
             enabled=enabled,
             replace_sft_look=replace_sft_look,
+            custom_descriptions=descriptions,
         )
