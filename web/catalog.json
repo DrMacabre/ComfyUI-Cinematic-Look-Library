@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "categories": {
+    "camera": [
+      {
+        "id": "alexa35",
+        "name": "ARRI ALEXA 35",
+        "render": "ARRI ALEXA 35 response, smooth highlight roll-off, lifelike skin tone separation, wide exposure latitude"
+      },
+      {
+        "id": "alexalf",
+        "name": "ARRI ALEXA Mini LF",
+        "render": "ARRI ALEXA Mini LF large-format digital cinema response, soft highlight gradation, nuanced midtones"
+      },
+      {
+        "id": "venice2",
+        "name": "Sony VENICE 2",
+        "render": "Sony VENICE 2 full-frame cinema color response, clear shadow details, precise tonal rendering"
+      },
+      {
+        "id": "vraptor",
+        "name": "RED V-RAPTOR",
+        "render": "RED V-RAPTOR digital cinema capture, dense contrast and detailed high-frequency textures"
+      },
+      {
+        "id": "ursa",
+        "name": "Blackmagic URSA Cine",
+        "render": "URSA Cine large-format cinematic tonal response, detailed highlights and rich colors"
+      },
+      {
+        "id": "dxl2",
+        "name": "Panavision DXL2",
+        "render": "Panavision Millennium DXL2 large-format cinema character, dimensional tones"
+      },
+      {
+        "id": "arriflex",
+        "name": "ARRIFLEX 435",
+        "render": "ARRIFLEX 435 35mm photochemical motion picture capture, organic density and highlight response"
+      },
+      {
+        "id": "panaflex",
+        "name": "Panavision Panaflex",
+        "render": "Panavision Panaflex Gold II 35mm cinema film capture with layered tonal density"
+      },
+      {
+        "id": "aaton",
+        "name": "Aaton XTR Prod",
+        "render": "Aaton XTR Prod Super 16mm motion-picture capture, tactile photochemical rendering"
+      }
+    ],
+    "lens": [
+      {
+        "id": "panchro",
+        "name": "Cooke Panchro Classic",
+        "render": "Cooke Panchro Classic spherical primes, warm rounded face rendering and graceful focus falloff"
+      },
+      {
+        "id": "s4",
+        "name": "Cooke S4/i",
+        "render": "Cooke S4/i spherical primes, smooth skin detail and consistent natural sharpness"
+      },
+      {
+        "id": "supreme",
+        "name": "Zeiss Supreme Prime",
+        "render": "Zeiss Supreme Prime spherical optics with precise detail and controlled bokeh"
+      },
+      {
+        "id": "superspeed",
+        "name": "Zeiss Super Speed",
+        "render": "Vintage Zeiss Super Speed spherical prime character and expressive focus transitions"
+      },
+      {
+        "id": "k35",
+        "name": "Canon K35",
+        "render": "Vintage Canon K35 primes, gentle contrast and softly graduated bokeh"
+      },
+      {
+        "id": "leica",
+        "name": "Leica Summilux-C",
+        "render": "Leica Summilux-C spherical cine optics with finely controlled focus transitions"
+      },
+      {
+        "id": "panac",
+        "name": "Panavision C-Series",
+        "render": "Panavision C-Series anamorphic lenses, oval out-of-focus highlights and horizontal flares"
+      },
+      {
+        "id": "orion",
+        "name": "Atlas Orion Anamorphic",
+        "render": "Atlas Orion anamorphic lenses, oval bokeh and characteristic directional flare"
+      },
+      {
+        "id": "signature",
+        "name": "ARRI Signature Prime",
+        "render": "ARRI Signature Prime large-format spherical optics with smooth background separation"
+      }
+    ],
+    "optical": [
+      {
+        "id": "clean",
+        "name": "Clean & Controlled",
+        "render": "restrained optical artifacts and consistent microcontrast"
+      },
+      {
+        "id": "vintage",
+        "name": "Soft Vintage Diffusion",
+        "render": "gentle optical diffusion and softened highlights"
+      },
+      {
+        "id": "glow",
+        "name": "Dreamy Halated Glow",
+        "render": "glowing luminous edges and gradual focus transitions"
+      },
+      {
+        "id": "crisp",
+        "name": "Crisp but Gentle",
+        "render": "accurate detail with smooth highlight edges"
+      },
+      {
+        "id": "bloom",
+        "name": "Heavy Anamorphic Bloom",
+        "render": "strong lens bloom and broad horizontal streaks around bright lights"
+      },
+      {
+        "id": "haze",
+        "name": "Low-Contrast Haze",
+        "render": "subtle veiling glare and softened microcontrast"
+      },
+      {
+        "id": "swirl",
+        "name": "Swirling Falloff",
+        "render": "swirling peripheral blur and off-axis focus falloff"
+      },
+      {
+        "id": "flare",
+        "name": "Vintage Flares",
+        "render": "organic flare ghosts and soft veiling reflections"
+      },
+      {
+        "id": "deep",
+        "name": "Deep Focus",
+        "render": "broad depth of field with readable distance detail"
+      },
+      {
+        "id": "shallow",
+        "name": "Creamy Shallow Focus",
+        "render": "very shallow depth of field and creamy backgrounds"
+      }
+    ],
+    "grade": [
+      {
+        "id": "neutral",
+        "name": "Neutral Naturalistic",
+        "render": "natural balanced color, controlled saturation and realistic contrast"
+      },
+      {
+        "id": "faded",
+        "name": "Warm Faded",
+        "render": "warm faded color, subdued shadows and gently desaturated midtones"
+      },
+      {
+        "id": "golden",
+        "name": "Golden Hour Warmth",
+        "render": "amber warm highlights and natural skin tones without changing the scene time"
+      },
+      {
+        "id": "cyan",
+        "name": "Cool Cyan Shadows",
+        "render": "cool cyan shadow bias with restrained highlights"
+      },
+      {
+        "id": "bleach",
+        "name": "Bleach Bypass",
+        "render": "muted saturation and punchy silver-toned contrast"
+      },
+      {
+        "id": "print",
+        "name": "Warm Film Print",
+        "render": "photochemical warm print tones and deep chromatic separation"
+      },
+      {
+        "id": "teal",
+        "name": "Teal & Amber",
+        "render": "teal shadow bias and amber highlight bias"
+      },
+      {
+        "id": "pastel",
+        "name": "Muted Pastel",
+        "render": "soft pastel color palette and muted separation"
+      },
+      {
+        "id": "noir",
+        "name": "Modern Noir",
+        "render": "cold restrained colors and deep controlled blacks"
+      },
+      {
+        "id": "urban",
+        "name": "Gritty Urban",
+        "render": "industrial muted palette and dense midtones"
+      }
+    ],
+    "texture": [
+      {
+        "id": "digital",
+        "name": "Clean Digital",
+        "render": "almost grain-free digital image finish"
+      },
+      {
+        "id": "fine",
+        "name": "Fine 35mm Grain",
+        "render": "fine even organic 35mm grain"
+      },
+      {
+        "id": "rich",
+        "name": "Rich 35mm Grain",
+        "render": "visible rich photochemical 35mm grain"
+      },
+      {
+        "id": "super16",
+        "name": "Gritty Super 16",
+        "render": "coarse irregular Super 16 grain structure"
+      },
+      {
+        "id": "negative",
+        "name": "Scanned Negative",
+        "render": "subtle scanned negative dye-cloud texture"
+      },
+      {
+        "id": "print",
+        "name": "Film Print",
+        "render": "soft photochemical print texture"
+      },
+      {
+        "id": "heavy",
+        "name": "Heavy Tactile Grain",
+        "render": "dense tactile coarse analog grain"
+      },
+      {
+        "id": "highspeed",
+        "name": "High-Speed Film",
+        "render": "fine high-speed film texture with organic shadows"
+      }
+    ]
+  },
+  "system_presets": [
+    {
+      "id": "classic",
+      "name": "Classic Cooke Warm",
+      "selection": {
+        "enabled": true,
+        "camera": "alexa35",
+        "lens": "panchro",
+        "optical": "vintage",
+        "grade": "faded",
+        "texture": "fine"
+      }
+    },
+    {
+      "id": "seventies",
+      "name": "70s Gritty Anamorphic",
+      "selection": {
+        "enabled": true,
+        "camera": "panaflex",
+        "lens": "panac",
+        "optical": "flare",
+        "grade": "print",
+        "texture": "rich"
+      }
+    },
+    {
+      "id": "prestige",
+      "name": "Prestige Natural Alexa",
+      "selection": {
+        "enabled": true,
+        "camera": "alexa35",
+        "lens": "signature",
+        "optical": "clean",
+        "grade": "neutral",
+        "texture": "fine"
+      }
+    },
+    {
+      "id": "period",
+      "name": "Dreamy Period Film",
+      "selection": {
+        "enabled": true,
+        "camera": "arriflex",
+        "lens": "k35",
+        "optical": "glow",
+        "grade": "pastel",
+        "texture": "negative"
+      }
+    },
+    {
+      "id": "digital",
+      "name": "Clean Premium Digital",
+      "selection": {
+        "enabled": true,
+        "camera": "venice2",
+        "lens": "supreme",
+        "optical": "crisp",
+        "grade": "neutral",
+        "texture": "digital"
+      }
+    }
+  ]
+}
